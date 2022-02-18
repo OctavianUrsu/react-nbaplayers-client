@@ -1,7 +1,7 @@
 .App {
   text-align: center;
-  background-color: #FBAB7E;
-  background-image: linear-gradient(62deg, #FBAB7E 0%, #F7CE68 100%);  
+  background-color: #fbab7e;
+  background-image: linear-gradient(62deg, #fbab7e 0%, #f7ce68 100%);
   min-height: 100vh;
   font-size: calc(10px + 2vmin);
   color: white;
@@ -9,7 +9,7 @@
 
 .App-header {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: space-between;
   margin: 0 3em;
@@ -17,4 +17,19 @@
 
 .Search-box {
   margin-top: 0.5em;
+  max-width: 700;
+  width: 100%;
+}
+
+.Player-card {
+  margin-top: 1.5em;
+  max-width: 700;
+  width: 100%;
+}
+
+.Player-label {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  margin: 0 3em;
 }
