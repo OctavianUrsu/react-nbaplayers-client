@@ -1,13 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
-
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+
+import { styled } from '@mui/material/styles';
 
 import { debounce } from 'lodash';
 
@@ -18,16 +23,22 @@ interface Player {
   teamId: number;
 }
 
+const CardContentNoPadding = styled(CardContent)(`
+  padding: 16px;
+  &:last-child {
+    padding-bottom: 16px;
+  }
+`);
+
 const BASE_URL =
   process.env.NODE_ENV === 'production' ? process.env.REACT_APP_BASE_URL : '';
 
 function App() {
-  //
-  const [inputValue, setInputValue] = useState<string>('');
+  // State for found players and selected player
   const [players, setPlayers] = useState<Player[]>([]);
   const [player, setPlayer] = useState<Player | null>(null);
 
-  //
+  // Autocomplete states for search results opening and loading
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,8 +52,6 @@ function App() {
         );
         const players = await response.json();
 
-        console.log('calling api for ', inputValue);
-
         setPlayers(players);
         setIsLoading(false);
       } catch (error) {
@@ -51,44 +60,36 @@ function App() {
     }, 500)
   ).current;
 
-  // Call the search function on input change
-  const onInputChangeHandler = (e: React.SyntheticEvent) => {
-    const target = e.target as HTMLInputElement;
-
-    if (target.value === undefined || target.value === null) {
-      target.value = '';
-    } else {
-      setInputValue(target.value);
-
-      if (target.value.length > 2) {
-        setOpen(true);
-        debouncedSearch(target.value);
-        console.log('calling debouncer for', target.value);
-      }
+  // Handle Autocomplete input change
+  const handleInputChange = (value: string) => {
+    if (value.length > 2) {
+      debouncedSearch(value);
     }
   };
 
-  // Handle the onClose event
-  const handleOnClose = () => {
-    setOpen(false);
-    setPlayers([]);
-    setInputValue('');
-  };
+  React.useEffect(() => {
+    if (!open) {
+      setPlayers([]);
+    }
+  }, [open]);
 
   const searchBox = (
     <Autocomplete
       id='player-search'
+      forcePopupIcon={false}
       filterOptions={(x) => x}
       open={open}
-      onClose={handleOnClose}
-      getOptionLabel={(player) => player.firstName + ' ' + player.lastName}
+      onOpen={(e) =>
+        (e.target as HTMLInputElement).value.length > 2 && setOpen(true)
+      }
+      onClose={() => setOpen(false)}
       options={players}
+      getOptionLabel={(player) => player.firstName + ' ' + player.lastName}
       isOptionEqualToValue={(o, v) => o.playerId === v.playerId}
       loading={isLoading}
-      defaultValue={null}
       value={player}
       onChange={(_, value) => setPlayer(value)}
-      onInputChange={onInputChangeHandler}
+      onInputChange={(_, value) => handleInputChange(value)}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -112,7 +113,7 @@ function App() {
 
   const PlayerCard = (
     <Card>
-      <CardContent>
+      <CardContentNoPadding>
         <div className='Player-label'>
           <div>
             <label>
@@ -138,8 +139,20 @@ function App() {
             </label>
             <Typography variant='body1'>{player?.teamId}</Typography>
           </div>
+          <div className='options'>
+            <IconButton aria-label='delete'>
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color='error'
+              aria-label='delete'
+              style={{ marginLeft: '5px' }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </div>
         </div>
-      </CardContent>
+      </CardContentNoPadding>
     </Card>
   );
 

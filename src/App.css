@@ -17,13 +17,13 @@
 
 .Search-box {
   margin-top: 0.5em;
-  max-width: 700;
+  max-width: 70vw;
   width: 100%;
 }
 
 .Player-card {
   margin-top: 1.5em;
-  max-width: 700;
+  max-width: 70vw;
   width: 100%;
 }
 
@@ -31,5 +31,14 @@
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-  margin: 0 3em;
+}
+
+.Player-label .options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.MuiCardContent-root .css-46bh2p-MuiCardContent-root {
+  padding: 16px;
 }
