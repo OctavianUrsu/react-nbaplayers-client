@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './App.css';
 
 import TextField from '@mui/material/TextField';
@@ -22,6 +22,13 @@ interface Player {
   lastName: string;
   teamId: number;
 }
+interface Team {
+  id: string;
+  name: string;
+  abbreviation: string;
+  location: string;
+  teamId: number;
+}
 
 const CardContentNoPadding = styled(CardContent)(`
   padding: 16px;
@@ -38,6 +45,10 @@ function App() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [player, setPlayer] = useState<Player | null>(null);
 
+  // State for found teams
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [team, setTeam] = useState<string>('');
+
   // Autocomplete states for search results opening and loading
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -47,15 +58,16 @@ function App() {
     debounce(async (inputValue: string) => {
       try {
         setIsLoading(true);
-        const response = await fetch(
+        const res = await fetch(
           `${BASE_URL}/api/players/search?name=${inputValue}`
         );
-        const players = await response.json();
+        const players = await res.json();
 
         setPlayers(players);
         setIsLoading(false);
       } catch (error) {
         setIsLoading(false);
+        console.error(error);
       }
     }, 500)
   ).current;
@@ -67,7 +79,31 @@ function App() {
     }
   };
 
-  React.useEffect(() => {
+  // Find team of selected player
+  const findTeam = (id: number) => {
+    for (let i = 0, l = teams.length; i < l; i++) {
+      if (teams[i].teamId === id) {
+        setTeam(teams[i].name);
+      }
+    }
+  };
+
+  // Get all teams from server
+  useEffect(() => {
+    async function fetchAPI() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/teams`);
+        const teams = await res.json();
+        setTeams(teams);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchAPI();
+  }, []);
+
+  useEffect(() => {
     if (!open) {
       setPlayers([]);
     }
@@ -82,13 +118,19 @@ function App() {
       onOpen={(e) =>
         (e.target as HTMLInputElement).value.length > 2 && setOpen(true)
       }
-      onClose={() => setOpen(false)}
+      onClose={() => {
+        setPlayers([]);
+        setOpen(false);
+      }}
       options={players}
       getOptionLabel={(player) => player.firstName + ' ' + player.lastName}
       isOptionEqualToValue={(o, v) => o.playerId === v.playerId}
       loading={isLoading}
       value={player}
-      onChange={(_, value) => setPlayer(value)}
+      onChange={(_, value) => {
+        setPlayer(value);
+        value?.teamId != null && findTeam(value.teamId);
+      }}
       onInputChange={(_, value) => handleInputChange(value)}
       renderInput={(params) => (
         <TextField
@@ -137,7 +179,7 @@ function App() {
             <label>
               <Typography variant='overline'>Team:</Typography>
             </label>
-            <Typography variant='body1'>{player?.teamId}</Typography>
+            <Typography variant='body1'>{team}</Typography>
           </div>
           <div className='options'>
             <IconButton aria-label='delete'>
