@@ -1,5 +1,5 @@
-import Button from '@mui/material/Button';
 import Login from './Login';
+import Register from './Register';
 
 import styles from './Navbar.module.css';
 
@@ -11,9 +11,7 @@ export default function Navbar() {
       </div>
       <div className='navbar__credentials'>
         <Login />
-        <Button variant='outlined' style={{ marginLeft: '0.5em' }}>
-          Register
-        </Button>
+        <Register />
       </div>
     </div>
   );
