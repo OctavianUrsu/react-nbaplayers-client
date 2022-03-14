@@ -7,12 +7,10 @@
   color: white;
 }
 
-.App-header {
+header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  margin: 0 3em;
 }
 
 .MuiCardContent-root .css-46bh2p-MuiCardContent-root {
