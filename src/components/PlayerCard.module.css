@@ -1,0 +1,17 @@
+.card {
+  margin-top: 1.5em;
+  max-width: 70vw;
+  width: 100%;
+}
+
+.card__label {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+}
+
+.card__options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
