@@ -12,3 +12,14 @@ export type Team = {
   location: string;
   teamId: number;
 }
+
+export type UserRegister = {
+  nickname: string;
+  email: string;
+  password: string;
+}
+
+export type UserLogin = {
+  nickname: string;
+  password: string;
+}
