@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { debounce } from 'lodash';
 
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import PlayerCard from './PlayerCard';
+import { Player, Team } from '../types/types';
 
 import styles from './Searchbar.module.css';
-
-import { debounce } from 'lodash';
-
-import { Player, Team } from '../types/types';
 
 const BASE_URL =
   process.env.NODE_ENV === 'production' ? process.env.REACT_APP_BASE_URL : '';
@@ -31,19 +30,17 @@ function Searchbar() {
   // Debounced search and call to API
   const debouncedSearch = React.useRef(
     debounce(async (inputValue: string) => {
-      try {
-        setIsLoading(true);
-        const res = await fetch(
-          `${BASE_URL}/api/players/search?name=${inputValue}`
-        );
-        const players = await res.json();
-
-        setPlayers(players);
-        setIsLoading(false);
-      } catch (error) {
-        setIsLoading(false);
-        console.error(error);
-      }
+      setIsLoading(true);
+      axios
+        .get<Player[]>(`${BASE_URL}/api/players/search?name=${inputValue}`)
+        .then((res) => {
+          setPlayers(res.data);
+          setIsLoading(false);
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          console.error(err);
+        });
     }, 500)
   ).current;
 
@@ -63,19 +60,11 @@ function Searchbar() {
     }
   };
 
-  // Get all teams from server
   useEffect(() => {
-    async function fetchAPI() {
-      try {
-        const res = await fetch(`${BASE_URL}/api/teams`);
-        const teams = await res.json();
-        setTeams(teams);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    fetchAPI();
+    axios
+      .get<Team[]>(`${BASE_URL}/api/teams`)
+      .then((res) => setTeams(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
   useEffect(() => {
@@ -86,50 +75,50 @@ function Searchbar() {
 
   return (
     <>
-    <div className={styles.searchbar}>
-      <Autocomplete
-        id='player-search'
-        forcePopupIcon={false}
-        filterOptions={(x) => x}
-        open={open}
-        onOpen={(e) =>
-          (e.target as HTMLInputElement).value.length > 2 && setOpen(true)
-        }
-        onClose={() => {
-          setPlayers([]);
-          setOpen(false);
-        }}
-        options={players}
-        getOptionLabel={(player) => player.firstName + ' ' + player.lastName}
-        isOptionEqualToValue={(o, v) => o.playerId === v.playerId}
-        loading={isLoading}
-        value={player}
-        onChange={(_, value) => {
-          setPlayer(value);
-          value?.teamId != null && findTeam(value.teamId);
-        }}
-        onInputChange={(_, value) => handleInputChange(value)}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            type='string'
-            label='Search players'
-            InputProps={{
-              ...params.InputProps,
-              endAdornment: (
-                <React.Fragment>
-                  {isLoading ? (
-                    <CircularProgress color='inherit' size={16} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </React.Fragment>
-              ),
-            }}
-          />
-        )}
-      />
-    </div>
-    {player && <PlayerCard player={player} team={team} />}
+      <div className={styles.searchbar}>
+        <Autocomplete
+          id='player-search'
+          forcePopupIcon={false}
+          filterOptions={(x) => x}
+          open={open}
+          onOpen={(e) =>
+            (e.target as HTMLInputElement).value.length > 2 && setOpen(true)
+          }
+          onClose={() => {
+            setPlayers([]);
+            setOpen(false);
+          }}
+          options={players}
+          getOptionLabel={(player) => player.firstName + ' ' + player.lastName}
+          isOptionEqualToValue={(o, v) => o.playerId === v.playerId}
+          loading={isLoading}
+          value={player}
+          onChange={(_, value) => {
+            setPlayer(value);
+            value?.teamId != null && findTeam(value.teamId);
+          }}
+          onInputChange={(_, value) => handleInputChange(value)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              type='string'
+              label='Search players'
+              InputProps={{
+                ...params.InputProps,
+                endAdornment: (
+                  <React.Fragment>
+                    {isLoading ? (
+                      <CircularProgress color='inherit' size={16} />
+                    ) : null}
+                    {params.InputProps.endAdornment}
+                  </React.Fragment>
+                ),
+              }}
+            />
+          )}
+        />
+      </div>
+      {player && <PlayerCard player={player} team={team} />}
     </>
   );
 }
