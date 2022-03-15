@@ -33,19 +33,6 @@ export default function Register() {
       .catch((err) => console.error(err));
   };
 
-  // const onSubmit = (data) => {
-  //   onLogin(data.email, data.password)
-  //     .then((_) => {
-  //       resetField('email');
-  //       resetField('password');
-  //       setOpenSnackbar(true);
-  //     })
-  //     .catch((error) => {
-  //       setError('email', { message: 'Недійсні облікові дані' });
-  //       console.error(error);
-  //     });
-  // };
-
   return (
     <>
       <Button
