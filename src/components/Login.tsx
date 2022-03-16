@@ -15,8 +15,9 @@ const BASE_URL =
   process.env.NODE_ENV === 'production' ? process.env.REACT_APP_BASE_URL : '';
 
 export default function Login() {
-  const { control, handleSubmit, setError } = useForm();
+  const { control, handleSubmit } = useForm();
   const [isLogged, setIsLogged] = React.useState<boolean>(false);
+  const [isCredentialError, setIsCredentialError] = React.useState<boolean>(false);
 
   // Modal states
   const [open, setOpen] = React.useState(false);
@@ -28,12 +29,12 @@ export default function Login() {
     axios
       .post(`${BASE_URL}/api/user/signin`, body)
       .then((res) => {
-        console.log(res.data);
+        setIsCredentialError(false);
         setIsLogged(true);
       })
       .catch((err) => {
         console.error(err);
-        setError('password', { message: 'Wrong password' });
+        setIsCredentialError(true);
       });
   };
 
@@ -132,7 +133,16 @@ export default function Login() {
                   display='block'
                   sx={{ color: 'green' }}
                 >
-                  Login was succesfull.
+                  Login was succesful.
+                </Typography>
+              )}
+              {isCredentialError && (
+                <Typography
+                  variant='overline'
+                  display='block'
+                  sx={{ color: 'red' }}
+                >
+                  Credentials are wrong.
                 </Typography>
               )}
             </div>
